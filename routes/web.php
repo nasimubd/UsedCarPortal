@@ -71,7 +71,9 @@ Route::prefix('admin')->name('admin.')->middleware([AdminMiddleware::class])->gr
     Route::get('users', [AdminController::class, 'users'])->name('users.index');
     Route::patch('users/{user}/promote', [AdminController::class, 'promote'])->name('users.update');
     Route::get('cars', [CarController::class, 'adminIndex'])->name('cars.index');
-    Route::get('appointments', [AppointmentController::class, 'index'])->name('appointments.index');
+    Route::get('appointments', [AppointmentController::class, 'adminIndex'])->name('appointments.index');
+    Route::post('appointments/{appointment}/approve', [AppointmentController::class, 'approve'])->name('appointments.approve');
+    Route::post('appointments/{appointment}/deny', [AppointmentController::class, 'deny'])->name('appointments.deny');
     Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::get('cars', [AdminController::class, 'cars'])->name('cars.index');
     Route::patch('cars/{car}/activate', [AdminController::class, 'activateCar'])->name('cars.activate');

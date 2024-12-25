@@ -47,7 +47,7 @@
                 @if($user->role !== 'admin')
                 <form action="{{ route('admin.users.update', $user) }}" method="POST" class="inline-block">
                     @csrf
-                    @method('PUT')
+                    @method('PATCH')
                     <input type="hidden" name="role" value="admin">
                     <button type="submit" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded">
                         Promote to Admin

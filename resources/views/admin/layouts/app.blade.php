@@ -17,7 +17,7 @@
                 <nav>
                     <ul>
                         <li class="mb-4">
-                            <a href="{{ route('admin.dashboard') }}" class="text-gray-700 hover:text-blue-500">
+                            <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-blue-500">
                                 Dashboard
                             </a>
                         </li>
