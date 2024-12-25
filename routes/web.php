@@ -53,16 +53,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Common  routes
 Route::resource('cars', CarController::class);
 Route::resource('appointments', AppointmentController::class)->only(['index', 'create', 'store', 'show']);
-Route::post('bids', [BidController::class, 'store'])->name('bids.store');
-
-// Place this in the authenticated users group
-Route::middleware('auth')->group(function () {
-    Route::post('bids', [BidController::class, 'store'])->name('bids.store');
-});
-
-// Route::get("home", [AdminController::class, 'index'])->middleware(['auth'])->name('home');
+Route::resource('bids', BidController::class)->only(['index', 'create', 'store', 'show']);
 
 // Add this route group with prefix and name
 Route::prefix('admin')->name('admin.')->middleware([AdminMiddleware::class])->group(function () {

@@ -47,8 +47,8 @@ class CarController extends Controller
         //     $query->where('is_active', true);
         // }
 
-        // Paginate the results
-        $cars = $query->paginate(10)->appends($request->query());
+        // Eager load the highestBid relationship
+        $cars = $query->with(['highestBid'])->paginate(10)->appends(request()->query());
 
         return view('cars.index', compact('cars', 'searchMake', 'searchModel', 'searchYear', 'priceMin', 'priceMax'));
     }
@@ -105,10 +105,14 @@ class CarController extends Controller
      */
     public function show(Car $car)
     {
-        // Eager load 'bids' relationship
-        $car->load('bids');
+        // Eager load the highestBid relationship if not already loaded
+        if (!$car->relationLoaded('highestBid')) {
+            $car->load('highestBid');
+        }
 
-        return view('cars.show', compact('car'));
+        $highestBid = $car->highestBid;
+
+        return view('cars.show', compact('car', 'highestBid'));
     }
 
     /**

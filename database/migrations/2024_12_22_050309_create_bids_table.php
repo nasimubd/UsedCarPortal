@@ -17,8 +17,10 @@ class CreateBidsTable extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('car_id')->constrained()->onDelete('cascade');
-            $table->decimal('bid_amount', 10, 2);
+            $table->decimal('amount', 10, 2);
             $table->timestamps();
+
+            // $table->unique(['user_id', 'car_id']); // Optional: Prevent multiple bids by the same user on the same car
         });
     }
 

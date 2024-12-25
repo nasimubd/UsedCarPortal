@@ -28,80 +28,25 @@
                 </div>
                 @endif
 
-                <!-- Bid Submission Form -->
-                @auth
-                @if(auth()->check() && auth()->user()->role === 'user')
-                <div class="mt-6 p-6 bg-white rounded-lg shadow-md">
-                    <h3 class="text-lg font-semibold mb-4">Place Your Bid</h3>
-
-                    <form action="{{ route('bids.store') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="car_id" value="{{ $car->id }}">
-
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">
-                                Your Bid Amount ($)
-                            </label>
-                            <input type="number"
-                                name="bid_amount"
-                                step="0.01"
-                                min="0"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                required>
-                        </div>
-
-                        <button type="submit"
-                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                            Place Bid
-                        </button>
-                    </form>
+                @if($highestBid)
+                <div class="mt-4">
+                    <h2 class="text-xl font-semibold">Current Highest Bid:</h2>
+                    <p class="text-gray-700">${{ number_format($highestBid->amount, 2) }}</p>
+                </div>
+                @else
+                <div class="mt-4">
+                    <p class="text-gray-700">No bids yet for this car.</p>
                 </div>
                 @endif
-                @endauth
-
-                <!-- Display Highest Bid -->
-                <div class="mt-4">
-                    <h4 class="font-semibold">Current Highest Bid:</h4>
-                    @php
-                    $highestBid = $car->bids()->latest('bid_amount')->first();
-                    @endphp
-
-                    @if($highestBid)
-                    <p class="text-xl text-green-600">${{ number_format($highestBid->bid_amount, 2) }}</p>
-                    <p class="text-sm text-gray-600">Bid placed by: {{ $highestBid->user->name }}</p>
-                    <p class="text-sm text-gray-600">{{ $highestBid->created_at->diffForHumans() }}</p>
-                    @else
-                    <p class="text-xl">No bids yet</p>
-                    @endif
-                </div>
-
-                <!-- Recent Bids -->
-                <div class="mt-6">
-                    <h4 class="font-semibold mb-2">Recent Bids</h4>
-                    @foreach($car->bids()->latest()->take(5)->get() as $bid)
-                    <div class="border-b py-2">
-                        <p>${{ number_format($bid->bid_amount, 2) }} by {{ $bid->user->name }}</p>
-                        <p class="text-sm text-gray-600">{{ $bid->created_at->diffForHumans() }}</p>
-                    </div>
-                    @endforeach
-                </div>
-
-
 
                 <div class="mt-6 flex space-x-4">
-                    @if(Auth::id() === $car->user_id || Auth::user()->isAdmin())
-                    <a href="{{ route('cars.edit', $car) }}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
-                        Edit
+                    <a href="{{ route('appointments.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Book Test Drive
                     </a>
 
-                    <form action="{{ route('cars.destroy', $car) }}" method="POST" onsubmit="return confirm('Are you sure you want to deactivate this car listing?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                            Deactivate
-                        </button>
-                    </form>
-                    @endif
+                    <a href="{{ route('bids.create') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                        Place a Bid
+                    </a>
                 </div>
             </div>
         </div>

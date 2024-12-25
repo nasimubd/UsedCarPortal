@@ -88,10 +88,18 @@ class Car extends Model
     }
 
     /**
-     * Get the bids placed by the user.
+     * Get the bids for the car.
      */
     public function bids()
     {
         return $this->hasMany(Bid::class);
+    }
+
+    /**
+     * Get the highest bid for the car.
+     */
+    public function highestBid()
+    {
+        return $this->hasOne(Bid::class)->orderBy('amount', 'desc');
     }
 }
