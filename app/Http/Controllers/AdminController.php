@@ -88,10 +88,17 @@ class AdminController extends Controller
                     ->take(5)
                     ->get();
 
-                $recentTransactions = Transaction::with(['buyer', 'car'])
+                $recentTransactions = Transaction::with(['bid', 'bid.user', 'bid.car'])
                     ->latest()
                     ->take(5)
                     ->get();
+
+
+                $recentTransactions = Transaction::with(['user', 'bid.car'])
+                    ->latest()
+                    ->take(5)
+                    ->get();
+
 
                 return view('admin.dashboard', compact(
                     'totalUsers',

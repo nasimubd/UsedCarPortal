@@ -13,7 +13,8 @@
             @if($car->image_path)
             <img src="{{ asset('storage/' . $car->image_path) }}" alt="{{ $car->make }} {{ $car->model }}" class="w-full h-64 object-cover">
             @else
-            <img src="{{ asset('images/no-image.png') }}" alt="No Image" class="w-full h-64 object-cover">
+            <img src="{{ asset('storage/' . $car->image_path) }}" alt="{{ $car->make }} {{ $car->model }}" class="w-full h-48 object-cover">
+
             @endif
 
             <div class="p-6">

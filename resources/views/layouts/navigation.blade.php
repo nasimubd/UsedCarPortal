@@ -35,15 +35,17 @@
                         <a href="{{ route('contact') }}" class="text-white hover:bg-green-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-300 ease-in-out transform hover:-translate-y-1">
                             {{ __('Contact Us') }}
                         </a>
-
+                        @auth
+                        @if(Auth::user()->isUser())
                         <a href="{{ route('appointments.index') }}">Book Appointments</a>
-
+                        @endif
+                        @endauth
                         @auth
                         @if(Auth::user()->isAdmin())
                         <li>
                             <a href="{{ route('admin.dashboard') }}" class="text-gray-700 hover:text-blue-500">
                                 <!-- You can use an icon here if desired -->
-                                <span class="ml-2">Admin Dashboard</span>
+                                <span class="text-white hover:bg-green-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-300 ease-in-out transform hover:-translate-y-1">Admin Dashboard</span>
                             </a>
                         </li>
                         @endif

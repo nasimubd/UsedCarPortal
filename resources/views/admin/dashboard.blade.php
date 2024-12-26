@@ -30,5 +30,10 @@
         <h2 class="text-xl font-semibold mb-2">Total Transactions</h2>
         <p class="text-3xl">{{ $totalTransactions }}</p>
     </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-2">Invoices</h2>
+        <a href="{{ route('admin.invoices.index') }}" class="text-blue-500 hover:underline">View All Invoices</a>
+    </div>
 </div>
 @endsection

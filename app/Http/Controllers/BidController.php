@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\BidPlaced;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Models\Transaction;
 
 class BidController extends Controller
 {
@@ -71,14 +72,19 @@ class BidController extends Controller
 
         // Ensure the new bid is higher than the current highest bid
         if ($validated['amount'] <= $highestBid) {
-            return redirect()->back()->withErrors(['amount' => 'Your bid must be higher than the current highest bid ($' . number_format($highestBid, 2) . ').'])->withInput();
+            return redirect()->back()->withErrors(['amount' => 'Your bid must be higher than the current highest bid (' . number_format($highestBid, 2) . ').'])->withInput();
         }
 
         // Create the bid
-        Bid::create([
+        $bid = Bid::create([
             'user_id' => Auth::id(),
             'car_id' => $validated['car_id'],
             'amount' => $validated['amount'],
+        ]);
+
+        Transaction::create([
+            'bid_id' => $bid->id,
+            'status' => 'pending',
         ]);
 
         return redirect()->route('bids.index')->with('success', 'Bid placed successfully!');

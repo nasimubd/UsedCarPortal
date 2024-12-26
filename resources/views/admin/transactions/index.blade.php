@@ -1,57 +1,92 @@
-@extends('admin.layouts.app')
-@vite(['resources/css/app.css', 'resources/js/app.js'])
+@extends('layouts.app')
+
 @section('content')
-<h1 class="text-2xl font-semibold mb-6">Manage Transactions</h1>
+<div class="py-12">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        @if(session('success'))
+        <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+            {{ session('success') }}
+        </div>
+        @endif
 
-<!-- Success and Error Messages -->
-@if(session('success'))
-<div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-    {{ session('success') }}
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-semibold">Manage Transactions</h1>
+        </div>
+
+        @if($transactions->count())
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Car</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bid Amount ($)</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach($transactions as $transaction)
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {{ $transaction->id }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {{ $transaction->bid->user->name }} ({{ $transaction->bid->user->email }})
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {{ $transaction->bid->car->make }} {{ $transaction->bid->car->model }} ({{ $transaction->bid->car->registration_year }})
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            ${{ number_format($transaction->bid->amount, 2) }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if($transaction->status === 'pending')
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                Pending
+                            </span>
+                            @elseif($transaction->status === 'approved')
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                Approved
+                            </span>
+                            @elseif($transaction->status === 'denied')
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                Denied
+                            </span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                            @if($transaction->status === 'pending')
+                            <form action="{{ route('admin.transactions.sell', $transaction) }}" method="POST" class="inline-block">
+                                @csrf
+                                <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded">
+                                    Sell
+                                </button>
+                            </form>
+
+                            <form action="{{ route('admin.transactions.deny', $transaction) }}" method="POST" class="inline-block ml-2">
+                                @csrf
+                                <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded">
+                                    Deny
+                                </button>
+                            </form>
+                            @else
+                            <span class="text-gray-500">No Actions</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-6">
+            {{ $transactions->links() }}
+        </div>
+        @else
+        <p class="text-center text-gray-600">There are no transactions to manage.</p>
+        @endif
+    </div>
 </div>
-@endif
-
-@if ($errors->any())
-<div class="mb-4">
-    <ul class="list-disc list-inside text-red-500">
-        @foreach ($errors->all() as $error)
-        <li>{{ $error }}</li>
-        @endforeach
-    </ul>
-</div>
-@endif
-
-@if($transactions->count())
-<table class="min-w-full bg-white">
-    <thead>
-        <tr>
-            <th class="py-2 px-4 border-b">Buyer</th>
-            <th class="py-2 px-4 border-b">Car</th>
-            <th class="py-2 px-4 border-b">Final Price</th>
-            <th class="py-2 px-4 border-b">Bid Amount</th>
-            <th class="py-2 px-4 border-b">Transaction Date</th>
-            <th class="py-2 px-4 border-b">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach($transactions as $transaction)
-        <tr class="text-center">
-            <td class="py-2 px-4 border-b">{{ $transaction->buyer->name }}</td>
-            <td class="py-2 px-4 border-b">{{ $transaction->car->make }} {{ $transaction->car->model }}</td>
-            <td class="py-2 px-4 border-b">${{ number_format($transaction->final_price, 2) }}</td>
-            <td class="py-2 px-4 border-b">${{ number_format($transaction->bid->bid_amount, 2) }}</td>
-            <td class="py-2 px-4 border-b">{{ $transaction->created_at->format('Y-m-d H:i') }}</td>
-            <td class="py-2 px-4 border-b">
-                <a href="{{ route('admin.transactions.show', $transaction) }}" class="text-blue-500 hover:underline">View</a>
-            </td>
-        </tr>
-        @endforeach
-    </tbody>
-</table>
-
-<div class="mt-6">
-    {{ $transactions->links() }}
-</div>
-@else
-<p class="text-center text-gray-600">No transactions found.</p>
-@endif
 @endsection
