@@ -3,19 +3,22 @@
 @section('content')
 <div class="py-12">
     <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-        @if(session('success'))
-        <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-            {{ session('success') }}
+        {{-- Image Display Section --}}
+        <div class="w-full h-96 bg-gray-200">
+            @if($car->image_path)
+            <img
+                src="{{ asset($car->image_path) }}"
+                alt="{{ $car->make }} {{ $car->model }}"
+                class="w-full h-full object-cover">
+            @else
+            <div class="flex items-center justify-center h-full text-gray-500">
+                No Image Available
+            </div>
+            @endif
         </div>
-        @endif
 
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
-            @if($car->image_path)
-            <img src="{{ asset('storage/' . $car->image_path) }}" alt="{{ $car->make }} {{ $car->model }}" class="w-full h-64 object-cover">
-            @else
-            <img src="{{ asset('storage/' . $car->image_path) }}" alt="{{ $car->make }} {{ $car->model }}" class="w-full h-48 object-cover">
 
-            @endif
 
             <div class="p-6">
                 <h1 class="text-3xl font-bold">{{ $car->make }} {{ $car->model }}</h1>
@@ -40,6 +43,7 @@
                 </div>
                 @endif
 
+                @auth
                 <div class="mt-6 flex space-x-4">
                     <a href="{{ route('appointments.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                         Book Test Drive
@@ -48,7 +52,11 @@
                     <a href="{{ route('bids.create') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                         Place a Bid
                     </a>
+                    <a href="{{ route('cars.edit', $car) }}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                        Edit Listing
+                    </a>
                 </div>
+                @endauth
             </div>
         </div>
 

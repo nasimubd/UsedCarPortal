@@ -102,4 +102,14 @@ class Car extends Model
     {
         return $this->hasOne(Bid::class)->orderBy('amount', 'desc');
     }
+
+    public function images()
+    {
+        return $this->hasMany(CarImage::class);
+    }
+
+    public function primaryImage()
+    {
+        return $this->hasOne(CarImage::class)->where('is_primary', true);
+    }
 }

@@ -6,6 +6,7 @@ use App\Models\Car;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Models\CarImage;
 
 class CarController extends Controller
 {
@@ -71,7 +72,6 @@ class CarController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate the request
         $validated = $request->validate([
             'make' => 'required|string|max:255',
             'model' => 'required|string|max:255',
@@ -79,20 +79,32 @@ class CarController extends Controller
             'price' => 'required|numeric|min:0',
             'registration_number' => 'required|string|max:20|unique:cars,registration_number',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Handle image upload if present
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('car_images', 'public');
-            $validated['image_path'] = $path;
+        // Create car
+        $car = Car::create([
+            'user_id' => Auth::id(),
+            'make' => $validated['make'],
+            'model' => $validated['model'],
+            'registration_year' => $validated['registration_year'],
+            'price' => $validated['price'],
+            'registration_number' => $validated['registration_number'],
+            'description' => $validated['description'] ?? null,
+        ]);
+
+        // Handle multiple image uploads
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                $path = $image->store('car_images', 'public');
+
+                CarImage::create([
+                    'car_id' => $car->id,
+                    'image_path' => $path,
+                    'is_primary' => $index === 0 // First image is primary
+                ]);
+            }
         }
-
-        // Assign the authenticated user's ID
-        $validated['user_id'] = Auth::id();
-
-        // Create the car listing
-        Car::create($validated);
 
         return redirect()->route('cars.index')->with('success', 'Car posted successfully!');
     }
@@ -140,11 +152,6 @@ class CarController extends Controller
      */
     public function update(Request $request, Car $car)
     {
-        // Check if the authenticated user is the owner or an admin
-        // if (Auth::id() !== $car->user_id && !Auth::user()->isAdmin()) {
-        //     abort(403, 'Unauthorized action.');
-        // }
-
         // Validate the request
         $validated = $request->validate([
             'make' => 'required|string|max:255',
@@ -153,23 +160,40 @@ class CarController extends Controller
             'price' => 'required|numeric|min:0',
             'registration_number' => 'required|string|max:20|unique:cars,registration_number,' . $car->id,
             'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_active' => 'sometimes|boolean',
+            'remove_images' => 'sometimes|array', // Array of image IDs to remove
         ]);
 
-        // Handle image upload if present
-        if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($car->image_path && Storage::disk('public')->exists($car->image_path)) {
-                Storage::disk('public')->delete($car->image_path);
-            }
+        // Update car details
+        $car->update([
+            'make' => $validated['make'],
+            'model' => $validated['model'],
+            'registration_year' => $validated['registration_year'],
+            'price' => $validated['price'],
+            'registration_number' => $validated['registration_number'],
+            'description' => $validated['description'] ?? null,
+            'is_active' => $request->has('is_active')
+        ]);
 
-            $path = $request->file('image')->store('car_images', 'public');
-            $validated['image_path'] = $path;
+        // Handle image removal if specified
+        if (!empty($validated['remove_images'] ?? [])) {
+            CarImage::whereIn('id', $validated['remove_images'])->delete();
         }
 
-        // Update the car listing
-        $car->update($validated);
+        // Handle multiple image uploads
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('car_images', 'public');
+
+                CarImage::create([
+                    'car_id' => $car->id,
+                    'image_path' => $path,
+                    // If no primary image exists, set this as primary
+                    'is_primary' => $car->images()->where('is_primary', true)->doesntExist()
+                ]);
+            }
+        }
 
         return redirect()->route('cars.show', $car)->with('success', 'Car updated successfully!');
     }

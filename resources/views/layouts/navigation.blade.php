@@ -37,7 +37,7 @@
                         </a>
                         @auth
                         @if(Auth::user()->isUser())
-                        <a href="{{ route('appointments.index') }}">Book Appointments</a>
+                        <a href="{{ route('appointments.index') }}" class="text-white hover:bg-green-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-300 ease-in-out transform hover:-translate-y-1">Book Appointments</a>
                         @endif
                         @endauth
                         @auth

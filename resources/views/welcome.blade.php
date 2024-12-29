@@ -14,8 +14,6 @@
         <div class="absolute inset-0">
             <img src="{{ asset('images/hero-car.jpg') }}" class="w-full h-full object-cover opacity-20">
         </div>
-
-        <!-- Navigation -->
         <!-- Navigation -->
         <div class="relative">
             <nav class="container mx-auto px-6 py-4">
@@ -28,7 +26,18 @@
                             <span class="text-white font-bold text-2xl">ABC Cars</span>
                         </a>
                     </div>
-                    <div class="space-x-6">
+
+                    <!-- Mobile Menu Button -->
+                    <div class="md:hidden">
+                        <button id="mobile-menu-toggle" class="text-white focus:outline-none">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Desktop Navigation -->
+                    <div class="hidden md:flex space-x-6 items-center">
                         <a href="{{ route('cars.index') }}" class="text-white hover:text-blue-200">Car Listings</a>
                         <a href="{{ route('about') }}" class="text-white hover:text-blue-200">About Us</a>
                         <a href="{{ route('contact') }}" class="text-white hover:text-blue-200">Contact</a>
@@ -44,6 +53,43 @@
                         <a href="{{ route('login') }}" class="text-white hover:text-blue-200">Login</a>
                         @if (Route::has('register'))
                         <a href="{{ route('register') }}" class="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50">Register</a>
+                        @endif
+                        @endauth
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Mobile Menu -->
+                <div id="mobile-menu" class="md:hidden fixed inset-0 bg-blue-900 z-50 transform translate-x-full transition-transform duration-300 ease-in-out">
+                    <div class="flex justify-between items-center p-6">
+                        <a href="{{ route('dashboard') }}" class="flex items-center">
+                            <svg class="w-10 h-10 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                            </svg>
+                            <span class="text-white font-bold text-2xl">ABC Cars</span>
+                        </a>
+                        <button id="mobile-menu-close" class="text-white focus:outline-none">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="flex flex-col space-y-6 p-6">
+                        <a href="{{ route('cars.index') }}" class="text-white text-xl hover:text-blue-200">Car Listings</a>
+                        <a href="{{ route('about') }}" class="text-white text-xl hover:text-blue-200">About Us</a>
+                        <a href="{{ route('contact') }}" class="text-white text-xl hover:text-blue-200">Contact</a>
+
+                        @if(Auth::check() && Auth::user()->isAdmin())
+                        <a href="{{ route('admin.dashboard') }}" class="text-white text-xl hover:text-blue-200">Admin Dashboard</a>
+                        @endif
+
+                        @if (Route::has('login'))
+                        @auth
+                        <a href="{{ url('/dashboard') }}" class="text-white text-xl hover:text-blue-200">Dashboard</a>
+                        @else
+                        <a href="{{ route('login') }}" class="text-white text-xl hover:text-blue-200">Login</a>
+                        @if (Route::has('register'))
+                        <a href="{{ route('register') }}" class="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 text-center">Register</a>
                         @endif
                         @endauth
                         @endif
@@ -174,6 +220,23 @@
             </div>
         </div>
     </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const mobileMenuClose = document.getElementById('mobile-menu-close');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            mobileMenuToggle.addEventListener('click', function() {
+                mobileMenu.classList.remove('translate-x-full');
+                mobileMenu.classList.add('translate-x-0');
+            });
+
+            mobileMenuClose.addEventListener('click', function() {
+                mobileMenu.classList.remove('translate-x-0');
+                mobileMenu.classList.add('translate-x-full');
+            });
+        });
+    </script>
 </body>
 
 </html>
