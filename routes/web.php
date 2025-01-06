@@ -55,18 +55,15 @@ Route::resource('cars', CarController::class);
 Route::resource('appointments', AppointmentController::class)->only(['index', 'create', 'store', 'show']);
 Route::resource('bids', BidController::class)->only(['index', 'create', 'store', 'show']);
 
-
-
-
-// In routes/web.php
+// Common routes for cars with admin middleware
 Route::patch('/cars/{car}/toggle-status', [CarController::class, 'toggleStatus'])
     ->name('cars.toggle-status')
     ->middleware(['auth']);
 
 
-Route::get('/admin/transactions', [TransactionController::class, 'index'])->name('admin.transactions.index');
-Route::post('/admin/transactions/{transaction}/sell', [TransactionController::class, 'sell'])->name('admin.transactions.sell');
-Route::post('/admin/transactions/{transaction}/deny', [TransactionController::class, 'deny'])->name('admin.transactions.deny');
+// Route::get('/admin/transactions', [TransactionController::class, 'index'])->name('admin.transactions.index');
+// Route::post('/admin/transactions/{transaction}/sell', [TransactionController::class, 'sell'])->name('admin.transactions.sell');
+// Route::post('/admin/transactions/{transaction}/deny', [TransactionController::class, 'deny'])->name('admin.transactions.deny');
 
 // Add this route group with prefix and name
 Route::prefix('admin')->name('admin.')->middleware([AdminMiddleware::class])->group(function () {
@@ -74,7 +71,7 @@ Route::prefix('admin')->name('admin.')->middleware([AdminMiddleware::class])->gr
     Route::get('dashboard', [AdminController::class, 'index'])->name('dashboard');
     Route::get('users', [AdminController::class, 'users'])->name('users.index');
     Route::patch('users/{user}/promote', [AdminController::class, 'promote'])->name('users.update');
-    Route::get('cars', [CarController::class, 'adminIndex'])->name('cars.index');
+    //Route::get('cars', [CarController::class, 'adminIndex'])->name('cars.index');
     Route::get('appointments', [AppointmentController::class, 'adminIndex'])->name('appointments.index');
     Route::post('appointments/{appointment}/approve', [AppointmentController::class, 'approve'])->name('appointments.approve');
     Route::post('appointments/{appointment}/deny', [AppointmentController::class, 'deny'])->name('appointments.deny');
@@ -88,9 +85,19 @@ Route::prefix('admin')->name('admin.')->middleware([AdminMiddleware::class])->gr
     // Manage Transactions
 
 });
+// Admin Cars routes
+Route::prefix('admin')->name('admin.')->middleware([AdminMiddleware::class])->group(function () {
+    Route::get('cars', [CarController::class, 'adminIndex'])->name('cars.index');
+    Route::put('cars/{car}', [CarController::class, 'adminUpdate'])->name('cars.update');
+});
 
-//Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show')->middleware('can:view,invoice');
+Route::prefix('admin')->name('admin.')->middleware([AdminMiddleware::class])->group(function () {
+    Route::put('cars/{car}/status', [CarController::class, 'updateCarStatus'])
+        ->name('cars.status.update');
+});
 
+
+// Admin Transactions routes
 Route::get('/admin/transactions', [TransactionController::class, 'index'])->name('admin.transactions.index');
 Route::post('/admin/transactions/{transaction}/sell', [TransactionController::class, 'sell'])->name('admin.transactions.sell');
 Route::post('/admin/transactions/{transaction}/deny', [TransactionController::class, 'deny'])->name('admin.transactions.deny');

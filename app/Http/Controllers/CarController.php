@@ -7,9 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Models\CarImage;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class CarController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the cars with search functionality.
      *
@@ -208,6 +211,7 @@ class CarController extends Controller
             }
         }
 
+
         return redirect()->route('cars.show', $car)->with('success', 'Car updated successfully!');
     }
 
@@ -249,5 +253,40 @@ class CarController extends Controller
 
         return redirect()->route('cars.show', $car)
             ->with('error', 'You are not authorized to change this listing status.');
+    }
+
+
+    public function adminIndex(Request $request)
+    {
+        $query = Car::query();
+
+        // Optional: Add search functionality
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('make', 'like', "%{$search}%")
+                    ->orWhere('model', 'like', "%{$search}%")
+                    ->orWhere('registration_number', 'like', "%{$search}%");
+            });
+        }
+
+        $cars = $query->paginate(10);
+
+        return view('admin.cars.index', compact('cars'));
+    }
+
+    public function updateCarStatus(Request $request, Car $car)
+    {
+        $this->authorize('update', $car);
+
+        $validated = $request->validate([
+            'is_active' => 'required|boolean'
+        ]);
+
+        $car->is_active = $validated['is_active'];
+        $car->save();
+
+        return redirect()->route('admin.cars.index')
+            ->with('success', 'Car status updated successfully');
     }
 }
