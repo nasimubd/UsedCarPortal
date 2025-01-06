@@ -16,49 +16,98 @@
         @endif
 
         <!-- Search Form -->
-        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
-            <form action="{{ route('cars.index') }}" method="GET">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label for="make" class="block text-gray-700">Make</label>
-                        <input type="text" name="make" id="make" value="{{ request('make') }}"
-                            class="w-full border rounded px-3 py-2">
+        <div class="bg-white shadow-2xl rounded-2xl p-8 mb-10 border-t-4 border-blue-500">
+            <form action="{{ route('cars.index') }}" method="GET" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {{-- Make Input with Icon --}}
+                    <div class="relative">
+                        <label for="make" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                            Make
+                        </label>
+                        <input type="text" name="make" id="make"
+                            value="{{ request('make') }}"
+                            placeholder="Enter car make"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300 ease-in-out">
                     </div>
-                    <div>
-                        <label for="model" class="block text-gray-700">Model</label>
-                        <input type="text" name="model" id="model" value="{{ request('model') }}"
-                            class="w-full border rounded px-3 py-2">
+
+                    {{-- Model Input with Icon --}}
+                    <div class="relative">
+                        <label for="model" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Model
+                        </label>
+                        <input type="text" name="model" id="model"
+                            value="{{ request('model') }}"
+                            placeholder="Enter car model"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300 ease-in-out">
                     </div>
-                    <div>
-                        <label for="registration_year" class="block text-gray-700">Year</label>
+
+                    {{-- Year Input with Icon --}}
+                    <div class="relative">
+                        <label for="registration_year" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            Year
+                        </label>
                         <input type="number" name="registration_year" id="registration_year"
                             value="{{ request('registration_year') }}"
-                            class="w-full border rounded px-3 py-2">
+                            placeholder="Car registration year"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300 ease-in-out">
                     </div>
-                    <div>
-                        <label for="price_min" class="block text-gray-700">Min Price</label>
+
+                    {{-- Price Range Inputs --}}
+                    <div class="relative">
+                        <label for="price_min" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Min Price
+                        </label>
                         <input type="number" name="price_min" id="price_min"
                             value="{{ request('price_min') }}"
-                            class="w-full border rounded px-3 py-2">
+                            placeholder="Minimum price"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300 ease-in-out">
                     </div>
-                    <div>
-                        <label for="price_max" class="block text-gray-700">Max Price</label>
+
+                    <div class="relative">
+                        <label for="price_max" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Max Price
+                        </label>
                         <input type="number" name="price_max" id="price_max"
                             value="{{ request('price_max') }}"
-                            class="w-full border rounded px-3 py-2">
+                            placeholder="Maximum price"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300 ease-in-out">
                     </div>
-                    <div class="flex items-end">
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+
+                    {{-- Search and Reset Buttons --}}
+                    <div class="flex items-end space-x-4">
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-xl transition transform hover:scale-105 shadow-lg flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
                             Search
                         </button>
-                        <a href="{{ route('cars.index') }}" class="ml-2 text-gray-500 hover:underline">
-                            Reset
-                        </a>
+                        <button class="bg-green-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl transition transform hover:scale-105 shadow-lg flex items-center">
+                            <a href="{{ route('cars.index') }}" class="text-gray-600 hover:text-white-600 flex items-center transition">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Reset
+                            </a>
+                        </button>
                     </div>
                 </div>
             </form>
         </div>
-        <!-- [Search form code remains unchanged] -->
         <!-- Car Listings -->
         @auth
         <div class="flex justify-between items-center mb-8">

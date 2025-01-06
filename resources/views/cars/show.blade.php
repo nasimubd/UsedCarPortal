@@ -79,7 +79,6 @@
                         class="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-lg text-center transition">
                         Edit Listing
                     </a>
-                    @if(auth()->user()->isAdmin() || auth()->user()->id == $car->user_id)
                     <form action="{{ route('cars.toggle-status', $car) }}" method="POST" class="w-full">
                         @csrf
                         @method('PATCH')
@@ -88,13 +87,15 @@
                             {{ $car->is_active ? 'Deactivate' : 'Activate' }} Listing
                         </button>
                     </form>
-                    @endif
-
                 </div>
                 @endif
-                @endauth
             </div>
+            @endauth
+            <a href="{{ route('cars.index') }}">
+                <span class="btn btn-secondary mt-4" style="color:red">GO BACK</span>
+            </a>
         </div>
     </div>
+</div>
 </div>
 @endsection

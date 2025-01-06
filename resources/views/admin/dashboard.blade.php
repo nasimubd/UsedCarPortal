@@ -69,6 +69,11 @@
                     <i class="fas fa-file-invoice-dollar mr-4"></i>
                     View Invoices
                 </a>
+
+                <a href="{{ route('admin.appointments.index') }}" class="flex items-center text-yellow-600 hover:bg-yellow-50 p-3 rounded-lg transition">
+                    <i class="fas fa-calendar-check mr-4"></i>
+                    Manage Appointments
+                </a>
             </div>
         </div>
 

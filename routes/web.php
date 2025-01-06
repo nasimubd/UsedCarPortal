@@ -81,7 +81,7 @@ Route::prefix('admin')->name('admin.')->middleware([AdminMiddleware::class])->gr
     Route::patch('cars/{car}/deactivate', [AdminController::class, 'deactivateCar'])->name('cars.deactivate');
     Route::resource('cars', AdminController::class)->except(['create', 'store', 'show']);
 
-    Route::get('/admin/bids', [BidController::class, 'adminIndex'])->name('admin.bids.index');
+    Route::get('/admin/bids', [BidController::class, 'adminIndex'])->name('bids.index');
     // Manage Transactions
 
 });
@@ -95,6 +95,10 @@ Route::prefix('admin')->name('admin.')->middleware([AdminMiddleware::class])->gr
     Route::put('cars/{car}/status', [CarController::class, 'updateCarStatus'])
         ->name('cars.status.update');
 });
+
+Route::patch('/cars/{car}/toggle-status', [CarController::class, 'toggleStatus'])
+    ->name('cars.toggle-status')
+    ->middleware(['auth']);
 
 
 // Admin Transactions routes

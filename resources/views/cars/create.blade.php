@@ -89,11 +89,17 @@
                 </div>
 
                 {{-- Submit Button --}}
-                <div class="mt-8 flex justify-end">
+                <div class="mt-8 flex justify-end space-x-4">
+                    <a href="{{ route('cars.index') }}"
+                        class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">
+                        Cancel
+                    </a>
+
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition transform hover:scale-105 shadow-lg">
                         List Car
                     </button>
                 </div>
+
             </form>
         </div>
     </div>

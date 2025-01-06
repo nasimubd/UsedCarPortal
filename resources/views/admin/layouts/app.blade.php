@@ -43,9 +43,14 @@
                             </svg>
                         </button>
 
-                        <h1 class="ml-4 text-xl font-semibold text-gray-800">
-                            @yield('page-title', 'Dashboard')
-                        </h1>
+                        <a href="{{ route('admin.dashboard') }}" class="flex items-center group md:hidden absolute left-1/2 transform -translate-x-1/2">
+                            <svg class="w-10 h-10 text-blue-600 mr-3 group-hover:rotate-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                            </svg>
+                            <span class="text-2xl font-bold text-blue-800 group-hover:text-blue-600 transition-colors">
+                                ABC Cars
+                            </span>
+                        </a>
                     </div>
 
                     <div class="flex items-center">
@@ -74,6 +79,7 @@
                     ['route' => 'admin.cars.index', 'icon' => 'car', 'label' => 'Car Listings'],
                     ['route' => 'admin.appointments.index', 'icon' => 'calendar-alt', 'label' => 'Appointments'],
                     ['route' => 'admin.transactions.index', 'icon' => 'money-check-alt', 'label' => 'Transactions'],
+                    ['route' => 'admin.bids.index', 'icon' => 'gavel', 'label' => 'Bids'],
                     ];
                     @endphp
 
@@ -110,7 +116,14 @@
         <!-- Desktop Sidebar -->
         <aside class="hidden md:block w-64 bg-white shadow-xl border-r border-gray-200 p-4">
             <div class="flex items-center justify-center mb-6">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-12 w-auto">
+                <a href="{{ route('admin.dashboard') }}" class="flex items-center group">
+                    <svg class="w-10 h-10 text-blue-600 mr-3 group-hover:rotate-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                    </svg>
+                    <span class="text-2xl font-bold text-blue-800 group-hover:text-blue-600 transition-colors">
+                        ABC Cars
+                    </span>
+                </a>
             </div>
 
             <nav>
