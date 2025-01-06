@@ -44,8 +44,12 @@ class CarController extends Controller
             });
 
         // For general users, show only active listings
-        // if (!Auth::check() || (Auth::check() && !Auth::user()->isAdmin())) {
-        //     $query->where('is_active', true);
+        // if (!auth()->check() || (auth()->check() && !optional(auth()->user())->isAdmin())) {
+        //     $query->where('is_active', true)
+        //         // Also show cars owned by the current user
+        //         ->orWhere(function ($q) {
+        //             $q->where('user_id', auth()->id());
+        //         });
         // }
 
         // Eager load the highestBid relationship
@@ -53,6 +57,7 @@ class CarController extends Controller
 
         return view('cars.index', compact('cars', 'searchMake', 'searchModel', 'searchYear', 'priceMin', 'priceMax'));
     }
+
 
     /**
      * Show the form for creating a new car.
@@ -117,6 +122,14 @@ class CarController extends Controller
      */
     public function show(Car $car)
     {
+        // Check if the car is inactive
+        if (!$car->is_active) {
+            // Allow viewing only for the car owner or admin
+            if (!Auth::check() || (Auth::user()->id !== $car->user_id &&
+                Auth::user()->role !== 'admin')) {
+                abort(403, 'You are not authorized to view this listing.');
+            }
+        }
         // Eager load the highestBid relationship if not already loaded
         if (!$car->relationLoaded('highestBid')) {
             $car->load('highestBid');
@@ -219,5 +232,22 @@ class CarController extends Controller
         $car->save();
 
         return redirect()->route('cars.index')->with('success', 'Car listing deactivated successfully!');
+    }
+
+    // In app/Http/Controllers/CarController.php
+    public function toggleStatus(Car $car)
+    {
+        $user = Auth::user();
+        // Ensure only the car owner or admin can toggle status
+        if ($user->role === 'admin' || $user->id === $car->user_id) {
+            $car->is_active = !$car->is_active;
+            $car->save();
+
+            return redirect()->route('cars.show', $car)
+                ->with('success', 'Car listing ' . ($car->is_active ? 'activated' : 'deactivated') . ' successfully.');
+        }
+
+        return redirect()->route('cars.show', $car)
+            ->with('error', 'You are not authorized to change this listing status.');
     }
 }

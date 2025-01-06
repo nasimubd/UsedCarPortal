@@ -8,60 +8,63 @@
 </head>
 
 <body>
-    <nav x-data="{ open: false }" class="bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg">
+    <nav x-data="{ open: false }" class="bg-white shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20">
                 <div class="flex">
-                    <!-- Logo -->
+                    <!-- Logo with Modern Design -->
                     <div class="shrink-0 flex items-center">
-                        <a href="{{ route('dashboard') }}" class="flex items-center">
-                            <svg class="w-10 h-10 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <a href="{{ route('dashboard') }}" class="flex items-center group">
+                            <svg class="w-10 h-10 text-blue-600 mr-3 group-hover:rotate-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
                             </svg>
-                            <span class="text-white font-bold text-2xl">ABC Cars</span>
+                            <span class="text-2xl font-bold text-blue-800 group-hover:text-blue-600 transition-colors">
+                                ABC Cars
+                            </span>
                         </a>
                     </div>
 
-                    <!-- Navigation Links -->
+                    <!-- Modern Navigation Links -->
                     <div class="hidden sm:ml-10 sm:flex sm:space-x-6 sm:items-center">
-                        <a href="{{ route('cars.index') }}" class="text-white hover:bg-green-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-300 ease-in-out transform hover:-translate-y-1">
-                            {{ __('Car Listings') }}
-                        </a>
+                        @php
+                        $navLinks = [
+                        ['route' => 'cars.index', 'label' => 'Car Listings'],
+                        ['route' => 'about', 'label' => 'About Us'],
+                        ['route' => 'contact', 'label' => 'Contact Us']
+                        ];
+                        @endphp
 
-                        <a href="{{ route('about') }}" class="text-white hover:bg-green-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-300 ease-in-out transform hover:-translate-y-1">
-                            {{ __('About Us') }}
+                        @foreach($navLinks as $link)
+                        <a href="{{ route($link['route']) }}" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ease-in-out hover:bg-blue-50 hover:shadow-sm">
+                            {{ __($link['label']) }}
                         </a>
+                        @endforeach
 
-                        <a href="{{ route('contact') }}" class="text-white hover:bg-green-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-300 ease-in-out transform hover:-translate-y-1">
-                            {{ __('Contact Us') }}
-                        </a>
                         @auth
                         @if(Auth::user()->isUser())
-                        <a href="{{ route('appointments.index') }}" class="text-white hover:bg-green-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-300 ease-in-out transform hover:-translate-y-1">Book Appointments</a>
+                        <a href="{{ route('appointments.index') }}" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ease-in-out hover:bg-blue-50 hover:shadow-sm">
+                            {{ __('Book Appointments') }}
+                        </a>
                         @endif
-                        @endauth
-                        @auth
+
                         @if(Auth::user()->isAdmin())
-                        <li>
-                            <a href="{{ route('admin.dashboard') }}" class="text-gray-700 hover:text-blue-500">
-                                <!-- You can use an icon here if desired -->
-                                <span class="text-white hover:bg-green-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-300 ease-in-out transform hover:-translate-y-1">Admin Dashboard</span>
-                            </a>
-                        </li>
+                        <a href="{{ route('admin.dashboard') }}" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ease-in-out hover:bg-blue-50 hover:shadow-sm">
+                            {{ __('Admin Dashboard') }}
+                        </a>
                         @endif
                         @endauth
                     </div>
                 </div>
 
-                <!-- User Authentication and Settings -->
+                <!-- User Authentication Section -->
                 <div class="hidden sm:flex sm:items-center sm:ml-6">
                     @auth
                     <div class="relative" x-data="{ dropdownOpen: false }">
                         <button
                             @click="dropdownOpen = !dropdownOpen"
-                            class="flex items-center text-white hover:bg-blue-700 px-4 py-2 rounded-full transition duration-300 ease-in-out">
-                            <span class="mr-2">{{ Auth::user()->name }}</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            class="flex items-center bg-blue-50 text-blue-800 px-4 py-2 rounded-full hover:bg-blue-100 transition-all duration-300">
+                            <span class="mr-2 font-medium">{{ Auth::user()->name }}</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
@@ -69,15 +72,15 @@
                         <div
                             x-show="dropdownOpen"
                             @click.away="dropdownOpen = false"
-                            class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl z-20 overflow-hidden">
-                            <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-gray-800 hover:bg-blue-100 transition duration-300">
+                            class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 z-50">
+                            <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 transition-colors">
                                 {{ __('Profile') }}
                             </a>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <a href="{{ route('logout') }}"
                                     onclick="event.preventDefault(); this.closest('form').submit();"
-                                    class="block px-4 py-2 text-gray-800 hover:bg-blue-100 transition duration-300">
+                                    class="block px-4 py-2 text-red-600 hover:bg-red-50 transition-colors">
                                     {{ __('Log Out') }}
                                 </a>
                             </form>
@@ -85,24 +88,24 @@
                     </div>
                     @else
                     <div class="flex space-x-4">
-                        <a href="{{ route('login') }}" class="text-white hover:bg-blue-700 px-4 py-2 rounded-md transition duration-300">
+                        <a href="{{ route('login') }}" class="text-blue-600 hover:text-blue-800 px-4 py-2 rounded-md transition-colors">
                             {{ __('Login') }}
                         </a>
-                        <a href="{{ route('register') }}" class="bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-md transition duration-300">
+                        <a href="{{ route('register') }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
                             {{ __('Register') }}
                         </a>
                     </div>
                     @endauth
                 </div>
 
-                <!-- Mobile menu button -->
+                <!-- Mobile Menu Button -->
                 <div class="-mr-2 flex items-center sm:hidden">
                     <button
                         @click="open = !open"
-                        class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-blue-200 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
-                        <span class="sr-only">Open main menu</span>
-                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path :class="{'hidden': open, 'inline-flex': !open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            <path :class="{'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>

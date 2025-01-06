@@ -93,7 +93,6 @@ class AdminController extends Controller
                     ->take(5)
                     ->get();
 
-
                 $recentTransactions = Transaction::with(['user', 'bid.car'])
                     ->latest()
                     ->take(5)

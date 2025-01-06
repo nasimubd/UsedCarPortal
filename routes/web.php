@@ -56,6 +56,14 @@ Route::resource('appointments', AppointmentController::class)->only(['index', 'c
 Route::resource('bids', BidController::class)->only(['index', 'create', 'store', 'show']);
 
 
+
+
+// In routes/web.php
+Route::patch('/cars/{car}/toggle-status', [CarController::class, 'toggleStatus'])
+    ->name('cars.toggle-status')
+    ->middleware(['auth']);
+
+
 Route::get('/admin/transactions', [TransactionController::class, 'index'])->name('admin.transactions.index');
 Route::post('/admin/transactions/{transaction}/sell', [TransactionController::class, 'sell'])->name('admin.transactions.sell');
 Route::post('/admin/transactions/{transaction}/deny', [TransactionController::class, 'deny'])->name('admin.transactions.deny');
