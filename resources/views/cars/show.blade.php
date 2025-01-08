@@ -1,114 +1,101 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-12">
-    <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-        @if(session('success'))
-        <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-            {{ session('success') }}
-        </div>
-        @endif
-
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
-            @if($car->image_path)
-            <img src="{{ asset('storage/' . $car->image_path) }}" alt="{{ $car->make }} {{ $car->model }}" class="w-full h-64 object-cover">
-            @else
-            <img src="{{ asset('images/no-image.png') }}" alt="No Image" class="w-full h-64 object-cover">
-            @endif
-
-            <div class="p-6">
-                <h1 class="text-3xl font-bold">{{ $car->make }} {{ $car->model }}</h1>
-                <p class="text-gray-600">Registration Year: {{ $car->registration_year }}</p>
-                <p class="text-gray-600">Price: ${{ number_format($car->price, 2) }}</p>
-                <p class="text-gray-600">Registration Number: {{ $car->registration_number }}</p>
-                @if($car->description)
-                <div class="mt-4">
-                    <h2 class="text-xl font-semibold">Description:</h2>
-                    <p class="text-gray-700">{{ $car->description }}</p>
-                </div>
-                @endif
-
-                <!-- Bid Submission Form -->
-                @auth
-                @if(auth()->check() && auth()->user()->role === 'user')
-                <div class="mt-6 p-6 bg-white rounded-lg shadow-md">
-                    <h3 class="text-lg font-semibold mb-4">Place Your Bid</h3>
-
-                    <form action="{{ route('bids.store') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="car_id" value="{{ $car->id }}">
-
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">
-                                Your Bid Amount ($)
-                            </label>
-                            <input type="number"
-                                name="bid_amount"
-                                step="0.01"
-                                min="0"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                required>
-                        </div>
-
-                        <button type="submit"
-                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                            Place Bid
-                        </button>
-                    </form>
-                </div>
-                @endif
-                @endauth
-
-                <!-- Display Highest Bid -->
-                <div class="mt-4">
-                    <h4 class="font-semibold">Current Highest Bid:</h4>
-                    @php
-                    $highestBid = $car->bids()->latest('bid_amount')->first();
-                    @endphp
-
-                    @if($highestBid)
-                    <p class="text-xl text-green-600">${{ number_format($highestBid->bid_amount, 2) }}</p>
-                    <p class="text-sm text-gray-600">Bid placed by: {{ $highestBid->user->name }}</p>
-                    <p class="text-sm text-gray-600">{{ $highestBid->created_at->diffForHumans() }}</p>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-100 py-12">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid md:grid-cols-2 gap-8">
+            {{-- Image Section --}}
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="h-96 w-full">
+                    @if($car->primaryImage)
+                    <img src="data:{{ $car->primaryImage->mime_type }};base64,{{ $car->primaryImage->image_data }}"
+                        alt="{{ $car->make }} {{ $car->model }}"
+                        class="w-full h-full object-cover">
                     @else
-                    <p class="text-xl">No bids yet</p>
-                    @endif
-                </div>
-
-                <!-- Recent Bids -->
-                <div class="mt-6">
-                    <h4 class="font-semibold mb-2">Recent Bids</h4>
-                    @foreach($car->bids()->latest()->take(5)->get() as $bid)
-                    <div class="border-b py-2">
-                        <p>${{ number_format($bid->bid_amount, 2) }} by {{ $bid->user->name }}</p>
-                        <p class="text-sm text-gray-600">{{ $bid->created_at->diffForHumans() }}</p>
+                    <div class="flex items-center justify-center h-full bg-gray-200 text-gray-500">
+                        No Image Available
                     </div>
-                    @endforeach
-                </div>
-
-
-
-                <div class="mt-6 flex space-x-4">
-                    @if(Auth::id() === $car->user_id || Auth::user()->isAdmin())
-                    <a href="{{ route('cars.edit', $car) }}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
-                        Edit
-                    </a>
-
-                    <form action="{{ route('cars.destroy', $car) }}" method="POST" onsubmit="return confirm('Are you sure you want to deactivate this car listing?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                            Deactivate
-                        </button>
-                    </form>
                     @endif
                 </div>
             </div>
-        </div>
 
-        <div class="mt-6">
-            <a href="{{ route('cars.index') }}" class="text-blue-500 hover:underline">← Back to Listings</a>
+            {{-- Car Details Section --}}
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-bold text-gray-800">
+                        {{ $car->make }} {{ $car->model }}
+                    </h1>
+                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                        {{ $car->registration_year }}
+                    </span>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-gray-600">Price</span>
+                        <span class="font-semibold text-blue-600">
+                            ${{ number_format($car->price, 2) }}
+                        </span>
+                    </div>
+
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-gray-600">Registration Number</span>
+                        <span>{{ $car->registration_number }}</span>
+                    </div>
+
+                    @if($car->description)
+                    <div>
+                        <h3 class="text-lg font-semibold mb-2">Description</h3>
+                        <p class="text-gray-600">{{ $car->description }}</p>
+                    </div>
+                    @endif
+
+                    {{-- Highest Bid Section --}}
+                    @if($highestBid)
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4">
+                        <h3 class="font-semibold text-green-800">Current Highest Bid</h3>
+                        <p class="text-green-600">${{ number_format($highestBid->amount, 2) }}</p>
+                    </div>
+                    @endif
+                </div>
+
+                {{-- Action Buttons --}}
+                @auth
+                <div class="mt-8 grid grid-cols-2 gap-4">
+                    <a href="{{ route('appointments.create') }}"
+                        class="bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg text-center transition">
+                        Book Test Drive
+                    </a>
+                    <a href="{{ route('bids.create') }}"
+                        class="bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg text-center transition">
+                        Place a Bid
+                    </a>
+                </div>
+
+                {{-- Admin/Owner Actions --}}
+                @if(auth()->user()->isAdmin() || auth()->user()->id == $car->user_id)
+                <div class="mt-4 flex space-x-4">
+                    <a href="{{ route('cars.edit', $car) }}"
+                        class="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-lg text-center transition">
+                        Edit Listing
+                    </a>
+                    <form action="{{ route('cars.toggle-status', $car) }}" method="POST" class="w-full">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit"
+                            class="w-full {{ $car->is_active ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600' }} text-white py-3 rounded-lg transition">
+                            {{ $car->is_active ? 'Deactivate' : 'Activate' }} Listing
+                        </button>
+                    </form>
+                </div>
+                @endif
+            </div>
+            @endauth
+            <a href="{{ route('cars.index') }}">
+                <span class="btn btn-secondary mt-4" style="color:red">GO BACK</span>
+            </a>
         </div>
     </div>
+</div>
 </div>
 @endsection

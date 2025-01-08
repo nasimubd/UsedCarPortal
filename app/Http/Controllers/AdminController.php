@@ -8,9 +8,12 @@ use App\Models\Car;
 use App\Models\Transaction;
 use App\Models\Appointment;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class AdminController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the registered users.
      *
@@ -88,10 +91,16 @@ class AdminController extends Controller
                     ->take(5)
                     ->get();
 
-                $recentTransactions = Transaction::with(['buyer', 'car'])
+                $recentTransactions = Transaction::with(['bid', 'bid.user', 'bid.car'])
                     ->latest()
                     ->take(5)
                     ->get();
+
+                $recentTransactions = Transaction::with(['user', 'bid.car'])
+                    ->latest()
+                    ->take(5)
+                    ->get();
+
 
                 return view('admin.dashboard', compact(
                     'totalUsers',
@@ -113,5 +122,16 @@ class AdminController extends Controller
         $cars = $query->paginate(10);
 
         return view('admin.cars.index', compact('cars'));
+    }
+
+    public function update(Request $request, Car $car)
+    {
+        $this->authorize('update', $car);
+
+        $car->is_active = $request->input('is_active');
+        $car->save();
+
+        return redirect()->route('admin.cars.index')
+            ->with('success', 'Car status updated successfully');
     }
 }

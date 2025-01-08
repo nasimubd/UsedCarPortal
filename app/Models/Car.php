@@ -22,7 +22,6 @@ class Car extends Model
         'price',
         'registration_number',
         'description',
-        'image_path',
         'is_active',
     ];
 
@@ -88,10 +87,28 @@ class Car extends Model
     }
 
     /**
-     * Get the bids placed by the user.
+     * Get the bids for the car.
      */
     public function bids()
     {
         return $this->hasMany(Bid::class);
+    }
+
+    /**
+     * Get the highest bid for the car.
+     */
+    public function highestBid()
+    {
+        return $this->hasOne(Bid::class)->orderBy('amount', 'desc');
+    }
+
+    public function images()
+    {
+        return $this->hasMany(CarImage::class);
+    }
+
+    public function primaryImage()
+    {
+        return $this->hasOne(CarImage::class)->where('is_primary', true);
     }
 }

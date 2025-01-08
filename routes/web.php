@@ -9,12 +9,9 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\BidController;
 use App\Http\Controllers\TransactionController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\CarController as AdminCarController;
-use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentController;
-use App\Http\Controllers\Admin\TransactionController as AdminTransactionController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\InvoiceController;
 
 
 
@@ -53,16 +50,20 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Common  routes
 Route::resource('cars', CarController::class);
 Route::resource('appointments', AppointmentController::class)->only(['index', 'create', 'store', 'show']);
-Route::post('bids', [BidController::class, 'store'])->name('bids.store');
+Route::resource('bids', BidController::class)->only(['index', 'create', 'store', 'show']);
 
-// Place this in the authenticated users group
-Route::middleware('auth')->group(function () {
-    Route::post('bids', [BidController::class, 'store'])->name('bids.store');
-});
+// Common routes for cars with admin middleware
+Route::patch('/cars/{car}/toggle-status', [CarController::class, 'toggleStatus'])
+    ->name('cars.toggle-status')
+    ->middleware(['auth']);
 
-// Route::get("home", [AdminController::class, 'index'])->middleware(['auth'])->name('home');
+
+// Route::get('/admin/transactions', [TransactionController::class, 'index'])->name('admin.transactions.index');
+// Route::post('/admin/transactions/{transaction}/sell', [TransactionController::class, 'sell'])->name('admin.transactions.sell');
+// Route::post('/admin/transactions/{transaction}/deny', [TransactionController::class, 'deny'])->name('admin.transactions.deny');
 
 // Add this route group with prefix and name
 Route::prefix('admin')->name('admin.')->middleware([AdminMiddleware::class])->group(function () {
@@ -70,15 +71,52 @@ Route::prefix('admin')->name('admin.')->middleware([AdminMiddleware::class])->gr
     Route::get('dashboard', [AdminController::class, 'index'])->name('dashboard');
     Route::get('users', [AdminController::class, 'users'])->name('users.index');
     Route::patch('users/{user}/promote', [AdminController::class, 'promote'])->name('users.update');
-    Route::get('cars', [CarController::class, 'adminIndex'])->name('cars.index');
-    Route::get('appointments', [AppointmentController::class, 'index'])->name('appointments.index');
-    Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    //Route::get('cars', [CarController::class, 'adminIndex'])->name('cars.index');
+    Route::get('appointments', [AppointmentController::class, 'adminIndex'])->name('appointments.index');
+    Route::post('appointments/{appointment}/approve', [AppointmentController::class, 'approve'])->name('appointments.approve');
+    Route::post('appointments/{appointment}/deny', [AppointmentController::class, 'deny'])->name('appointments.deny');
+    // Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::get('cars', [AdminController::class, 'cars'])->name('cars.index');
     Route::patch('cars/{car}/activate', [AdminController::class, 'activateCar'])->name('cars.activate');
     Route::patch('cars/{car}/deactivate', [AdminController::class, 'deactivateCar'])->name('cars.deactivate');
     Route::resource('cars', AdminController::class)->except(['create', 'store', 'show']);
+
+    Route::get('/admin/bids', [BidController::class, 'adminIndex'])->name('bids.index');
+    // Manage Transactions
+
+});
+// Admin Cars routes
+Route::prefix('admin')->name('admin.')->middleware([AdminMiddleware::class])->group(function () {
+    Route::get('cars', [CarController::class, 'adminIndex'])->name('cars.index');
+    Route::put('cars/{car}', [CarController::class, 'adminUpdate'])->name('cars.update');
 });
 
+Route::prefix('admin')->name('admin.')->middleware([AdminMiddleware::class])->group(function () {
+    Route::put('cars/{car}/status', [CarController::class, 'updateCarStatus'])
+        ->name('cars.status.update');
+});
 
+Route::patch('/cars/{car}/toggle-status', [CarController::class, 'toggleStatus'])
+    ->name('cars.toggle-status')
+    ->middleware(['auth']);
+
+
+// Admin Transactions routes
+Route::get('/admin/transactions', [TransactionController::class, 'index'])->name('admin.transactions.index');
+Route::post('/admin/transactions/{transaction}/sell', [TransactionController::class, 'sell'])->name('admin.transactions.sell');
+Route::post('/admin/transactions/{transaction}/deny', [TransactionController::class, 'deny'])->name('admin.transactions.deny');
+
+// Invoice route
+Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])
+    ->name('invoices.show')
+    ->middleware('can:view,invoice');
+
+Route::get('/admin/invoices', [InvoiceController::class, 'index'])
+    ->name('admin.invoices.index')
+    ->middleware('can:viewAny,App\Models\Invoice');
+
+Route::post('/admin/invoices/{invoice}/resend', [InvoiceController::class, 'resend'])
+    ->name('admin.invoices.resend')
+    ->middleware('can:resend,invoice');
 
 require __DIR__ . '/auth.php';

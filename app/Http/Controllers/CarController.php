@@ -6,9 +6,13 @@ use App\Models\Car;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Models\CarImage;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class CarController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the cars with search functionality.
      *
@@ -43,15 +47,20 @@ class CarController extends Controller
             });
 
         // For general users, show only active listings
-        // if (!Auth::check() || (Auth::check() && !Auth::user()->isAdmin())) {
-        //     $query->where('is_active', true);
+        // if (!auth()->check() || (auth()->check() && !optional(auth()->user())->isAdmin())) {
+        //     $query->where('is_active', true)
+        //         // Also show cars owned by the current user
+        //         ->orWhere(function ($q) {
+        //             $q->where('user_id', auth()->id());
+        //         });
         // }
 
-        // Paginate the results
-        $cars = $query->paginate(10)->appends($request->query());
+        // Eager load the highestBid relationship
+        $cars = $query->with(['highestBid', 'primaryImage'])->paginate(10)->appends(request()->query());
 
         return view('cars.index', compact('cars', 'searchMake', 'searchModel', 'searchYear', 'priceMin', 'priceMax'));
     }
+
 
     /**
      * Show the form for creating a new car.
@@ -71,7 +80,6 @@ class CarController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate the request
         $validated = $request->validate([
             'make' => 'required|string|max:255',
             'model' => 'required|string|max:255',
@@ -79,24 +87,35 @@ class CarController extends Controller
             'price' => 'required|numeric|min:0',
             'registration_number' => 'required|string|max:20|unique:cars,registration_number',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10120', // 5MB max
         ]);
 
-        // Handle image upload if present
+        // Create car
+        $car = Car::create([
+            'user_id' => Auth::id(),
+            'make' => $validated['make'],
+            'model' => $validated['model'],
+            'registration_year' => $validated['registration_year'],
+            'price' => $validated['price'],
+            'registration_number' => $validated['registration_number'],
+            'description' => $validated['description'] ?? null,
+        ]);
+
+        // Handle image upload
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('car_images', 'public');
-            $validated['image_path'] = $path;
+            $image = $request->file('image');
+            $imageData = base64_encode(file_get_contents($image->getRealPath()));
+
+            CarImage::create([
+                'car_id' => $car->id,
+                'image_data' => $imageData,
+                'mime_type' => $image->getMimeType(),
+                'is_primary' => true
+            ]);
         }
-
-        // Assign the authenticated user's ID
-        $validated['user_id'] = Auth::id();
-
-        // Create the car listing
-        Car::create($validated);
 
         return redirect()->route('cars.index')->with('success', 'Car posted successfully!');
     }
-
     /**
      * Display the specified car.
      *
@@ -105,10 +124,25 @@ class CarController extends Controller
      */
     public function show(Car $car)
     {
-        // Eager load 'bids' relationship
-        $car->load('bids');
+        // Check if the car is inactive
+        if (!$car->is_active) {
+            // Allow viewing only for the car owner or admin
+            if (!Auth::check() || (Auth::user()->id !== $car->user_id &&
+                Auth::user()->role !== 'admin')) {
+                abort(403, 'You are not authorized to view this listing.');
+            }
+        }
+        // Eager load the highestBid relationship if not already loaded
+        if (!$car->relationLoaded('highestBid')) {
+            $car->load('highestBid');
+        }
 
-        return view('cars.show', compact('car'));
+        // Eager load the highestBid and primaryImage relationships
+        $car->load(['highestBid', 'primaryImage']);
+        $primaryImage = $car->primaryImage;
+        $highestBid = $car->highestBid;
+
+        return view('cars.show', compact('car', 'highestBid', 'primaryImage'));
     }
 
     /**
@@ -136,12 +170,6 @@ class CarController extends Controller
      */
     public function update(Request $request, Car $car)
     {
-        // Check if the authenticated user is the owner or an admin
-        // if (Auth::id() !== $car->user_id && !Auth::user()->isAdmin()) {
-        //     abort(403, 'Unauthorized action.');
-        // }
-
-        // Validate the request
         $validated = $request->validate([
             'make' => 'required|string|max:255',
             'model' => 'required|string|max:255',
@@ -149,23 +177,51 @@ class CarController extends Controller
             'price' => 'required|numeric|min:0',
             'registration_number' => 'required|string|max:20|unique:cars,registration_number,' . $car->id,
             'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'is_active' => 'sometimes|boolean',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'remove_images' => 'sometimes|array',
+            'is_primary_image' => 'sometimes|boolean',
         ]);
 
-        // Handle image upload if present
-        if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($car->image_path && Storage::disk('public')->exists($car->image_path)) {
-                Storage::disk('public')->delete($car->image_path);
-            }
+        // Update car details
+        $car->update([
+            'make' => $validated['make'],
+            'model' => $validated['model'],
+            'registration_year' => $validated['registration_year'],
+            'price' => $validated['price'],
+            'registration_number' => $validated['registration_number'],
+            'description' => $validated['description'] ?? null,
+        ]);
 
-            $path = $request->file('image')->store('car_images', 'public');
-            $validated['image_path'] = $path;
+        // Handle image removal
+        if (!empty($validated['remove_images'] ?? [])) {
+            CarImage::whereIn('id', $validated['remove_images'])->delete();
         }
 
-        // Update the car listing
-        $car->update($validated);
+        // Handle new image uploads
+        if ($request->hasFile('images')) {
+            $isPrimarySet = false;
+            foreach ($request->file('images') as $image) {
+                $imageData = base64_encode(file_get_contents($image->getRealPath()));
+
+                // Set primary image logic
+                $isPrimary = false;
+                if (
+                    !$isPrimarySet &&
+                    ($request->has('is_primary_image') ||
+                        $car->images()->where('is_primary', true)->doesntExist())
+                ) {
+                    $isPrimary = true;
+                    $isPrimarySet = true;
+                }
+
+                CarImage::create([
+                    'car_id' => $car->id,
+                    'image_data' => $imageData,
+                    'mime_type' => $image->getMimeType(),
+                    'is_primary' => $isPrimary
+                ]);
+            }
+        }
 
         return redirect()->route('cars.show', $car)->with('success', 'Car updated successfully!');
     }
@@ -191,5 +247,57 @@ class CarController extends Controller
         $car->save();
 
         return redirect()->route('cars.index')->with('success', 'Car listing deactivated successfully!');
+    }
+
+    // In app/Http/Controllers/CarController.php
+    public function toggleStatus(Car $car)
+    {
+        $user = Auth::user();
+        // Ensure only the car owner or admin can toggle status
+        if ($user->role === 'admin' || $user->id === $car->user_id) {
+            $car->is_active = !$car->is_active;
+            $car->save();
+
+            return redirect()->route('cars.show', $car)
+                ->with('success', 'Car listing ' . ($car->is_active ? 'activated' : 'deactivated') . ' successfully.');
+        }
+
+        return redirect()->route('cars.show', $car)
+            ->with('error', 'You are not authorized to change this listing status.');
+    }
+
+
+    public function adminIndex(Request $request)
+    {
+        $query = Car::query();
+
+        // Optional: Add search functionality
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('make', 'like', "%{$search}%")
+                    ->orWhere('model', 'like', "%{$search}%")
+                    ->orWhere('registration_number', 'like', "%{$search}%");
+            });
+        }
+
+        $cars = $query->paginate(10);
+
+        return view('admin.cars.index', compact('cars'));
+    }
+
+    public function updateCarStatus(Request $request, Car $car)
+    {
+        $this->authorize('update', $car);
+
+        $validated = $request->validate([
+            'is_active' => 'required|boolean'
+        ]);
+
+        $car->is_active = $validated['is_active'];
+        $car->save();
+
+        return redirect()->route('admin.cars.index')
+            ->with('success', 'Car status updated successfully');
     }
 }

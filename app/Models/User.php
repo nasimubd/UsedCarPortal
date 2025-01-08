@@ -8,10 +8,14 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Car;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Appointment;
+
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Notifiable;
 
     // Role constants
     public const ROLE_USER = 'user';
@@ -60,6 +64,7 @@ class User extends Authenticatable
 
     {
         return $this->role === 'admin';
+        return $this->is_admin == true;
     }
 
     /**
@@ -80,13 +85,18 @@ class User extends Authenticatable
         return $this->hasMany(Car::class);
     }
 
+
     /**
-     * Get the appointments booked by the user.
+
+     * Get the appointments for the user.
+
      */
-    public function appointments()
+
+    public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class);
     }
+
 
     /**
      * Get the bids placed by the user.
@@ -98,6 +108,6 @@ class User extends Authenticatable
 
     public function transactions()
     {
-        return $this->hasMany(Transaction::class, 'buyer_id');
+        return $this->hasMany(Transaction::class, 'admin_id');
     }
 }

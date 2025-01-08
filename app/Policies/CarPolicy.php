@@ -19,7 +19,7 @@ class CarPolicy
      */
     public function update(User $user, Car $car)
     {
-        return $user->id === $car->user_id || $user->isAdmin();
+        return $user->id === $car->user_id || $user->role === 'admin';
     }
 
     /**
@@ -34,5 +34,19 @@ class CarPolicy
         return $user->id === $car->user_id || $user->isAdmin();
     }
 
-    // Additional policy methods as needed...
+    public function viewInIndex(User $user = null, Car $car = null)
+    {
+        // If no user is logged in
+        if (!$user) {
+            return $car->is_active;
+        }
+
+        // Admin can see everything
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        // User can see their own cars and active cars
+        return $car->is_active || $car->user_id === $user->id;
+    }
 }

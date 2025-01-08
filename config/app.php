@@ -151,6 +151,7 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
+        // Intervention\Image\ImageServiceProvider::class,
 
         /*
         * Package Service Providers...
@@ -165,5 +166,11 @@ return [
         //App\Providers\RouteServiceProvider::class,
 
     ],
+
+    // 'aliases' => [
+    //     // ...
+    //     // 'Image' => Intervention\Image\Facades\Image::class,
+    //     'Auth' => Illuminate\Support\Facades\Auth::class,
+    // ],
 
 ];
