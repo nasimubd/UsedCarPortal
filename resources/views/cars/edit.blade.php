@@ -108,7 +108,7 @@
                 </div>
 
                 <!-- Image Upload and Management Section -->
-                <div class="mt-6">
+                <!-- <div class="mt-6">
                     <h2 class="text-lg font-medium text-gray-700 mb-4">Current Images</h2>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                         @foreach($car->images as $image)
@@ -141,7 +141,7 @@
                             class="form-checkbox h-5 w-5 text-blue-600">
                         <span class="ml-2 text-gray-700">Set first uploaded image as primary</span>
                     </label>
-                </div>
+                </div> -->
 
                 <div class="mt-6">
                     <label class="inline-flex items-center">

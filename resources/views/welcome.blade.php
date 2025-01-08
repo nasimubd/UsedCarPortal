@@ -109,8 +109,6 @@
                 <!-- <div class="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-blue-800/80"></div> -->
             </div>
 
-            <!-- Navigation stays the same -->
-
             <!-- Hero Content -->
             <div class="relative z-10 container mx-auto px-6 h-[calc(100vh-88px)] flex items-center justify-center">
                 <div class="max-w-3xl text-center">

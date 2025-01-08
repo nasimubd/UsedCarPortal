@@ -87,7 +87,7 @@ class CarController extends Controller
             'price' => 'required|numeric|min:0',
             'registration_number' => 'required|string|max:20|unique:cars,registration_number',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10120', // 5MB max
         ]);
 
         // Create car

@@ -6,16 +6,13 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up()
     {
         Schema::create('car_images', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('car_id');
-            $table->binary('image_data'); // Store image as binary data
-            $table->string('mime_type'); // Store mime type of the image
+            $table->longText('image_data'); // Change to longText
+            $table->string('mime_type');
             $table->boolean('is_primary')->default(false);
             $table->timestamps();
 
@@ -23,9 +20,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('car_images');
