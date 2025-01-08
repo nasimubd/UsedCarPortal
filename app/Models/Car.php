@@ -22,7 +22,6 @@ class Car extends Model
         'price',
         'registration_number',
         'description',
-        'image_path',
         'is_active',
     ];
 

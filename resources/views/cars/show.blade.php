@@ -7,8 +7,8 @@
             {{-- Image Section --}}
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
                 <div class="h-96 w-full">
-                    @if($car->image_path)
-                    <img src="{{ asset($car->image_path) }}"
+                    @if($car->primaryImage)
+                    <img src="data:{{ $car->primaryImage->mime_type }};base64,{{ $car->primaryImage->image_data }}"
                         alt="{{ $car->make }} {{ $car->model }}"
                         class="w-full h-full object-cover">
                     @else

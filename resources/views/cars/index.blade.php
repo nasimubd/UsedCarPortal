@@ -108,6 +108,7 @@
                 </div>
             </form>
         </div>
+
         <!-- Car Listings -->
         @auth
         <div class="flex justify-between items-center mb-8">
@@ -125,19 +126,20 @@
             <div class="bg-white rounded-2xl overflow-hidden shadow-xl transform transition hover:scale-105 hover:shadow-2xl">
                 {{-- Car Image --}}
                 <div class="h-56 w-full relative">
-                    @if($car->image_path)
-                    <img src="{{ asset($car->image_path) }}"
+                    @if($car->primaryImage)
+                    <img src="data:{{ $car->primaryImage->mime_type }};base64,{{ $car->primaryImage->image_data }}"
                         alt="{{ $car->make }} {{ $car->model }}"
                         class="w-full h-full object-cover">
                     @else
                     <div class="flex items-center justify-center h-full bg-gray-200 text-gray-500">
-                        No Image
+                        No Image Available
                     </div>
                     @endif
                     <div class="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
                         {{ $car->registration_year }}
                     </div>
                 </div>
+
                 {{-- Car Details --}}
                 <div class="p-6">
                     <h2 class="text-2xl font-bold text-gray-800 mb-2">

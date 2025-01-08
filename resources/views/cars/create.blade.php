@@ -80,7 +80,7 @@
                     <div class="md:col-span-2">
                         <label class="block text-gray-700 font-medium mb-2">Car Image</label>
                         <div class="border-2 border-dashed border-blue-200 rounded-lg p-6 text-center">
-                            <input type="file" name="image"
+                            <input type="file" name="image" {{-- Change from images[] to image --}}
                                 class="w-full file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-blue-700 hover:file:bg-blue-100"
                                 accept="image/*">
                             <p class="text-gray-500 mt-2">PNG, JPG, JPEG up to 5MB</p>

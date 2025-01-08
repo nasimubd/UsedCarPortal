@@ -56,7 +56,7 @@ class CarController extends Controller
         // }
 
         // Eager load the highestBid relationship
-        $cars = $query->with(['highestBid'])->paginate(10)->appends(request()->query());
+        $cars = $query->with(['highestBid', 'primaryImage'])->paginate(10)->appends(request()->query());
 
         return view('cars.index', compact('cars', 'searchMake', 'searchModel', 'searchYear', 'priceMin', 'priceMax'));
     }
@@ -87,7 +87,7 @@ class CarController extends Controller
             'price' => 'required|numeric|min:0',
             'registration_number' => 'required|string|max:20|unique:cars,registration_number',
             'description' => 'nullable|string',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
         ]);
 
         // Create car
@@ -101,22 +101,21 @@ class CarController extends Controller
             'description' => $validated['description'] ?? null,
         ]);
 
-        // Handle multiple image uploads
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('car_images', 'public');
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageData = base64_encode(file_get_contents($image->getRealPath()));
 
-                CarImage::create([
-                    'car_id' => $car->id,
-                    'image_path' => $path,
-                    'is_primary' => $index === 0 // First image is primary
-                ]);
-            }
+            CarImage::create([
+                'car_id' => $car->id,
+                'image_data' => $imageData,
+                'mime_type' => $image->getMimeType(),
+                'is_primary' => true
+            ]);
         }
 
         return redirect()->route('cars.index')->with('success', 'Car posted successfully!');
     }
-
     /**
      * Display the specified car.
      *
@@ -138,9 +137,12 @@ class CarController extends Controller
             $car->load('highestBid');
         }
 
+        // Eager load the highestBid and primaryImage relationships
+        $car->load(['highestBid', 'primaryImage']);
+        $primaryImage = $car->primaryImage;
         $highestBid = $car->highestBid;
 
-        return view('cars.show', compact('car', 'highestBid'));
+        return view('cars.show', compact('car', 'highestBid', 'primaryImage'));
     }
 
     /**
@@ -168,7 +170,6 @@ class CarController extends Controller
      */
     public function update(Request $request, Car $car)
     {
-        // Validate the request
         $validated = $request->validate([
             'make' => 'required|string|max:255',
             'model' => 'required|string|max:255',
@@ -176,9 +177,9 @@ class CarController extends Controller
             'price' => 'required|numeric|min:0',
             'registration_number' => 'required|string|max:20|unique:cars,registration_number,' . $car->id,
             'description' => 'nullable|string',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'is_active' => 'sometimes|boolean',
-            'remove_images' => 'sometimes|array', // Array of image IDs to remove
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'remove_images' => 'sometimes|array',
+            'is_primary_image' => 'sometimes|boolean',
         ]);
 
         // Update car details
@@ -189,28 +190,38 @@ class CarController extends Controller
             'price' => $validated['price'],
             'registration_number' => $validated['registration_number'],
             'description' => $validated['description'] ?? null,
-            'is_active' => $request->has('is_active')
         ]);
 
-        // Handle image removal if specified
+        // Handle image removal
         if (!empty($validated['remove_images'] ?? [])) {
             CarImage::whereIn('id', $validated['remove_images'])->delete();
         }
 
-        // Handle multiple image uploads
+        // Handle new image uploads
         if ($request->hasFile('images')) {
+            $isPrimarySet = false;
             foreach ($request->file('images') as $image) {
-                $path = $image->store('car_images', 'public');
+                $imageData = base64_encode(file_get_contents($image->getRealPath()));
+
+                // Set primary image logic
+                $isPrimary = false;
+                if (
+                    !$isPrimarySet &&
+                    ($request->has('is_primary_image') ||
+                        $car->images()->where('is_primary', true)->doesntExist())
+                ) {
+                    $isPrimary = true;
+                    $isPrimarySet = true;
+                }
 
                 CarImage::create([
                     'car_id' => $car->id,
-                    'image_path' => $path,
-                    // If no primary image exists, set this as primary
-                    'is_primary' => $car->images()->where('is_primary', true)->doesntExist()
+                    'image_data' => $imageData,
+                    'mime_type' => $image->getMimeType(),
+                    'is_primary' => $isPrimary
                 ]);
             }
         }
-
 
         return redirect()->route('cars.show', $car)->with('success', 'Car updated successfully!');
     }

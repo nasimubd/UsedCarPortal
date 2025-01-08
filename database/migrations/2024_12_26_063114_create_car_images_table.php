@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('car_images', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('car_id');
-            $table->string('image_path');
+            $table->binary('image_data'); // Store image as binary data
+            $table->string('mime_type'); // Store mime type of the image
             $table->boolean('is_primary')->default(false);
             $table->timestamps();
 

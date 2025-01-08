@@ -107,13 +107,13 @@
                     </div>
                 </div>
 
-                <!-- Rest of the existing code remains the same -->
+                <!-- Image Upload and Management Section -->
                 <div class="mt-6">
                     <h2 class="text-lg font-medium text-gray-700 mb-4">Current Images</h2>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                         @foreach($car->images as $image)
                         <div class="relative group">
-                            <img src="{{ asset('storage/' . $image->image_path) }}"
+                            <img src="data:{{ $image->mime_type }};base64,{{ base64_encode($image->image_data) }}"
                                 alt="Car image"
                                 class="w-full h-48 object-cover rounded-lg {{ $image->is_primary ? 'ring-4 ring-blue-500' : '' }}">
                             <div class="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
@@ -133,6 +133,14 @@
                     <input type="file" name="images[]" id="images" multiple accept="image/*"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                     <p class="text-sm text-gray-500 mt-1">You can select multiple images. Supported formats: JPEG, PNG, JPG, GIF</p>
+                </div>
+
+                <div class="mt-6">
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" name="is_primary_image" value="1"
+                            class="form-checkbox h-5 w-5 text-blue-600">
+                        <span class="ml-2 text-gray-700">Set first uploaded image as primary</span>
+                    </label>
                 </div>
 
                 <div class="mt-6">

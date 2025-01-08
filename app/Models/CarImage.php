@@ -8,7 +8,8 @@ class CarImage extends Model
 {
     protected $fillable = [
         'car_id',
-        'image_path',
+        'image_data',
+        'mime_type',
         'is_primary'
     ];
 
